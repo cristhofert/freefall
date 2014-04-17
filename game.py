@@ -19,16 +19,21 @@ class Game(glucosa.GameArea):
 
         self.set_update_loop(60)
         self.set_background(glucosa.Image('images/space.png'))
+        self.add_sprite(Cloud(self))
+        self.add_sprite(Cloud(self))
+        self.add_sprite(Cloud(self))
+        self.add_sprite(Cloud(self))
         self.jumper = Jumper(self)
-
+        self.coin = Coin(self)
 class Jumper(glucosa.Sprite):
 
     def __init__(self, game):
         self.game = game
+        self.speed = 6
         self.image = glucosa.Image('images/jumper.png')
-        self.control = glucosa.Control(self.game.canvas)
+        self.control = glucosa.Control(self.game)
 
-        glucosa.Sprite.__init__(self, self.images, 0, 0)
+        glucosa.Sprite.__init__(self, self.image, 0, 0)
         self.game.add_sprite(self)
 
     def update(self):
@@ -36,17 +41,6 @@ class Jumper(glucosa.Sprite):
             self.x -= self.speed
         elif self.control.right:
             self.x += self.speed
-
-        if self.control.down:
-            self.y += self.speed
-        elif self.control.up:
-            self.y -= self.speed
-
-        if self.can_fire_counter > 0:
-            if self.control.fire:
-                self.fire()
-        else:
-            self.can_fire_counter += 1
 
         self._set_bounds()
 
@@ -65,11 +59,41 @@ class Jumper(glucosa.Sprite):
         elif self.y + 70 > 480:
             self.y = 480 -70
 
+class Coin(glucosa.Sprite):
+
+    def __init__(self, game):
+        image = glucosa.Image('images/coin.png')
+        glucosa.Sprite.__init__(self, image, 0, -10)
+        self.speed = 3
+        game.add_sprite(self)
+
+    def update(self):
+        self. y -= self.speed
+
+        if self.y < 0:
+            self.x = random.randint(0, WIGTH)
+            self.y = HEITH + random.randint(20, 300)
+
 class Cloud(glucosa.Sprite):
+
+    def __init__(self, game):
+        image = glucosa.Image('images/cloud.png')
+        glucosa.Sprite.__init__(self, image, 0, -10)
+        self.speed = 1
+        game.add_sprite(self)
+
+    def update(self):
+        self. y -= self.speed
+
+        if self.y < 0:
+            self.x = random.randint(0, WIGTH)
+            self.y = HEITH + random.randint(20, 300)
+
+class CloudP(glucosa.Sprite):
 
     def __init__(self):
         image = glucosa.Image('images/cloud.png')
-        x = random.randint(0, WIGHT)
+        x = random.randint(0, WIGTH)
         y = random.randint(0, HEITH)
         glucosa.Sprite.__init__(self, image, x, y)
         self.speed = random.randint(1, 3)
@@ -77,7 +101,7 @@ class Cloud(glucosa.Sprite):
     def update(self):
         self.y -= self.speed
 
-        if self.y > 480:
+        if self.y < 0:
             self.y = -20
             self.x = random.randint(0, WIGTH)
 
@@ -89,8 +113,11 @@ class Window(gtk.Window):
         self.connect('destroy', gtk.main_quit)
 
         self.set_title('Freefall')
+        self.resize(WIGTH, HEITH)
 
         self.add(Game())
+
+        self.show_all()
 
 
 if __name__ == '__main__':
